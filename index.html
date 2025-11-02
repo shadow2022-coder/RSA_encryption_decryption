@@ -1,0 +1,575 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 RSA Chat - Visual Encryption Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .user-section {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-section.alice {
+            border-left: 4px solid #667eea;
+        }
+
+        .user-section.bob {
+            border-left: 4px solid #764ba2;
+        }
+
+        .user-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-header .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .user-section.alice .avatar {
+            background: #667eea;
+        }
+
+        .user-section.bob .avatar {
+            background: #764ba2;
+        }
+
+        .demo-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .demo-info h3 {
+            color: #1976d2;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .demo-info p {
+            color: #333;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .chat-box {
+            flex: 1;
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            max-height: 250px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-size: 12px;
+        }
+
+        .message.sent {
+            background: #e3f2fd;
+            border-left: 3px solid #667eea;
+        }
+
+        .message.received {
+            background: #f3e5f5;
+            border-left: 3px solid #764ba2;
+        }
+
+        .message.encrypted {
+            background: #fff3cd;
+            border-left: 3px solid #ff9800;
+        }
+
+        .message.decrypted {
+            background: #d4edda;
+            border-left: 3px solid #28a745;
+        }
+
+        .message.system {
+            background: #e8f5e9;
+            border-left: 3px solid #4caf50;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .message-header {
+            font-weight: bold;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .message-content {
+            color: #333;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .decrypt-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+
+        .decrypt-btn:hover {
+            background: #f57c00;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .input-section button {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .user-section.bob .input-section button {
+            background: #764ba2;
+        }
+
+        .input-section button:hover {
+            opacity: 0.9;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .button-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .btn-generate {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-generate:hover {
+            background: #45a049;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 RSA Chat - Visual Encryption Demo</h1>
+            <p>See how RSA-2048 encryption works in real-time</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Alice Section -->
+            <div class="user-section alice">
+                <div class="user-header">
+                    <div class="avatar">A</div>
+                    <span>Alice</span>
+                </div>
+
+                <div class="demo-info">
+                    <h3>📌 Alice's Process:</h3>
+                    <p>1. Generate RSA keys<br>2. Type message<br>3. Click Send<br>4. Message encrypted with Bob's public key</p>
+                </div>
+
+                <div class="status" id="alice-status"></div>
+
+                <div class="button-group">
+                    <button class="btn-generate" onclick="generateKeysAlice()">Generate Alice's Keys</button>
+                </div>
+
+                <div class="chat-box" id="alice-chat"></div>
+
+                <div class="input-section">
+                    <input type="text" id="alice-message" placeholder="Type message..." onkeypress="handleAliceKeyPress(event)">
+                    <button onclick="sendMessageFromAlice()">Send</button>
+                </div>
+            </div>
+
+            <!-- Bob Section -->
+            <div class="user-section bob">
+                <div class="user-header">
+                    <div class="avatar">B</div>
+                    <span>Bob</span>
+                </div>
+
+                <div class="demo-info">
+                    <h3>📌 Bob's Process:</h3>
+                    <p>1. Generate RSA keys<br>2. Receive encrypted message<br>3. Click Decrypt button<br>4. See decrypted message</p>
+                </div>
+
+                <div class="status" id="bob-status"></div>
+
+                <div class="button-group">
+                    <button class="btn-generate" onclick="generateKeysBob()">Generate Bob's Keys</button>
+                </div>
+
+                <div class="chat-box" id="bob-chat"></div>
+
+                <div class="input-section">
+                    <input type="text" id="bob-message" placeholder="Type message..." onkeypress="handleBobKeyPress(event)">
+                    <button onclick="sendMessageFromBob()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button onclick="clearChat()" style="background: #ff6b6b; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Clear Chat</button>
+            <p style="margin-top: 10px;">🔐 All messages are encrypted with RSA-2048 using PKCS1_OAEP padding</p>
+        </div>
+    </div>
+
+    <script>
+        let encryptedMessages = [];
+        let messageId = 0;
+
+        async function generateKeysAlice() {
+            try {
+                showStatus('alice', 'Generating keys...', 'loading');
+                const response = await fetch('/api/generate-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'alice' })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessageToChat('alice', 'system', '✓ Alice keys generated! Ready to send messages.');
+                    showStatus('alice', '✓ Keys generated! Send a message to Bob.', 'success');
+                } else {
+                    showStatus('alice', '✗ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('alice', '✗ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function generateKeysBob() {
+            try {
+                showStatus('bob', 'Generating keys...', 'loading');
+                const response = await fetch('/api/generate-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'bob' })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessageToChat('bob', 'system', '✓ Bob keys generated! Ready to receive and decrypt messages.');
+                    showStatus('bob', '✓ Keys generated! Ready to receive messages.', 'success');
+                } else {
+                    showStatus('bob', '✗ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('bob', '✗ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function sendMessageFromAlice() {
+            const message = document.getElementById('alice-message').value.trim();
+            if (!message) return;
+
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: 'alice',
+                        message: message,
+                        recipient: 'bob'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessageToChat('alice', 'sent', message);
+                    
+                    const msgId = messageId++;
+                    encryptedMessages.push({
+                        id: msgId,
+                        from: 'alice',
+                        encrypted: data.encrypted_message,
+                        recipient: 'bob'
+                    });
+                    
+                    const encryptedPreview = data.encrypted_message.substring(0, 40) + '...';
+                    addEncryptedMessageToChat('bob', 'encrypted', encryptedPreview, msgId, 'bob');
+                    
+                    document.getElementById('alice-message').value = '';
+                    showStatus('alice', '✓ Message sent!', 'success');
+                } else {
+                    showStatus('alice', '✗ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('alice', '✗ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function sendMessageFromBob() {
+            const message = document.getElementById('bob-message').value.trim();
+            if (!message) return;
+
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: 'bob',
+                        message: message,
+                        recipient: 'alice'
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessageToChat('bob', 'sent', message);
+                    
+                    const msgId = messageId++;
+                    encryptedMessages.push({
+                        id: msgId,
+                        from: 'bob',
+                        encrypted: data.encrypted_message,
+                        recipient: 'alice'
+                    });
+                    
+                    const encryptedPreview = data.encrypted_message.substring(0, 40) + '...';
+                    addEncryptedMessageToChat('alice', 'encrypted', encryptedPreview, msgId, 'alice');
+                    
+                    document.getElementById('bob-message').value = '';
+                    showStatus('bob', '✓ Message sent!', 'success');
+                } else {
+                    showStatus('bob', '✗ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus('bob', '✗ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function decryptMessage(msgId, recipient) {
+            try {
+                const msgData = encryptedMessages.find(m => m.id === msgId);
+                if (!msgData) return;
+
+                const response = await fetch('/api/receive-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        encrypted_message: msgData.encrypted,
+                        recipient: recipient
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    addMessageToChat(recipient, 'decrypted', '✓ Decrypted: ' + data.decrypted_message);
+                    showStatus(recipient, '✓ Message decrypted!', 'success');
+                } else {
+                    showStatus(recipient, '✗ Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showStatus(recipient, '✗ Error: ' + error.message, 'error');
+            }
+        }
+
+        function addMessageToChat(user, type, message) {
+            const chatBox = document.getElementById(user + '-chat');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + type;
+
+            let header = '';
+            if (type === 'sent') {
+                header = 'You (Sent):';
+            } else if (type === 'decrypted') {
+                header = 'Decrypted Message:';
+            } else if (type === 'system') {
+                header = 'System:';
+            }
+
+            msgDiv.innerHTML = `<div class="message-header">${header}</div><div class="message-content">${escapeHtml(message)}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function addEncryptedMessageToChat(user, type, message, msgId, recipient) {
+            const chatBox = document.getElementById(user + '-chat');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + type;
+
+            msgDiv.innerHTML = `
+                <div class="message-header">🔒 Encrypted Message:</div>
+                <div class="message-content">${escapeHtml(message)}</div>
+                <button class="decrypt-btn" onclick="decryptMessage(${msgId}, '${recipient}')">🔓 Decrypt Message</button>
+            `;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showStatus(user, message, type) {
+            const status = document.getElementById(user + '-status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+        }
+
+        function handleAliceKeyPress(event) {
+            if (event.key === 'Enter') sendMessageFromAlice();
+        }
+
+        function handleBobKeyPress(event) {
+            if (event.key === 'Enter') sendMessageFromBob();
+        }
+
+        async function clearChat() {
+            if (confirm('Clear all messages?')) {
+                await fetch('/api/clear', { method: 'POST' });
+                document.getElementById('alice-chat').innerHTML = '';
+                document.getElementById('bob-chat').innerHTML = '';
+                encryptedMessages = [];
+                messageId = 0;
+                document.getElementById('alice-status').className = 'status';
+                document.getElementById('bob-status').className = 'status';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
